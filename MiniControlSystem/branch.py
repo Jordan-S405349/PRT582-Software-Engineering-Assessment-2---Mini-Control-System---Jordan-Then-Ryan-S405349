@@ -5,7 +5,7 @@ from .repository import Repository
 
 
 def creating_branch(repo: Repository, name: str) -> None:
-    if not name or name.strip():
+    if not name or not name.strip():
         raise ValueError("Please fill the branch name")
     
     refs = repo.load_json("refs.json")
@@ -18,7 +18,7 @@ def creating_branch(repo: Repository, name: str) -> None:
     
     
 def list_branches(repo: Repository) -> List[str]:
-    return sorted(repo.load_json("refs.json".keys()))
+    return sorted(repo.load_json("refs.json").keys())
 
 
 def delete_branch(repo: Repository, name: str) -> None:

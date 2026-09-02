@@ -27,7 +27,7 @@ def find_common_ancestor(repo: Repository, commit_a: str, commit_b: str) -> Opti
     return None
 
 
-def mmerge(repo: Repository, source_branch: str) -> Dict:
+def merge(repo: Repository, source_branch: str) -> Dict:
     """Merging the 'source_branch' into the current branch
     """
     

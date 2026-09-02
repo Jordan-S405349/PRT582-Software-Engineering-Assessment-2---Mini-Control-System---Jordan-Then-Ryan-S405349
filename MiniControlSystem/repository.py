@@ -158,7 +158,7 @@ class Repository:
         
         parent = self.head_commit()
         if parent:
-            commits = self.load_json("commits.join")
+            commits = self.load_json("commits.json")
             files = dict(commits[parent]["files"])
         else:
             files = {}
