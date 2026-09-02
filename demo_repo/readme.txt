@@ -1,0 +1,1 @@
+Mini VCS demo project

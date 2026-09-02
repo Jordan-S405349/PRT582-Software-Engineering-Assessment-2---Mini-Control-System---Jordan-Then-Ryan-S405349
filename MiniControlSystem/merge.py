@@ -1,7 +1,7 @@
 from __future__ import annotations
 from typing import Dict, List, Optional
-from repository import Repository, hash_bytes
-from exceptions import (
+from .repository import Repository, hash_bytes
+from .exceptions import (
     MergeConflictError,
     BranchCommitNotFound,
     UncommitedChanges

@@ -41,15 +41,16 @@ class Repository:
         if os.path.isdir(meta_path):
             raise RepositoryAlredyExist(F"{abstract_path} is already exist in Mini Version Control System Repository")
         
-        os.makedirs(os.path.join(meta_path, "objects"), exist=True)
+        os.makedirs(os.path.join(meta_path, "objects"), exist_ok=True)
         repo = cls.__new__(cls)
         repo.path = abstract_path
         repo.meta_path = meta_path
         
         repo.save_json("commits.json", {})
-        repo.save_json("refs.json", {default_branch})
-        repo.save_json("Staging.json", {})
+        repo.save_json("refs.json", {default_branch: None})
+        repo.save_json("staging.json", {})
         repo.write_head(f"ref: {default_branch}")
+        return repo
         
     """The low level metadata helpers"""
     def json_path(self, name: str) -> str:
@@ -64,11 +65,11 @@ class Repository:
             json.dump(data, fh, indent=2)
     
     def write_head(self, content: str) -> None:
-        with open(os.path.join(self.meta_patch, "HEAD"), "w", encoding="utf-8") as fh:
+        with open(os.path.join(self.meta_path, "HEAD"), "w", encoding="utf-8") as fh:
             fh.write(content)
     
     def read_head(self) -> str:
-        with open(os.path.join(self.meta_patch, "HEAD"), "w", encoding="utf-8") as fh:
+        with open(os.path.join(self.meta_path, "HEAD"), "r", encoding="utf-8") as fh:
             return fh.read().strip()
         
     def store_blob(self, data: bytes) -> str:
@@ -89,7 +90,7 @@ class Repository:
     def current_branch(self) -> Optional[str]:
         head = self.read_head()
         if head.startswith("ref: "):
-            return head[len("ref: ")]
+            return head[len("ref: "):]
         return None # detaching the HEAD
     
     def head_commit(self) -> Optional[str]:
@@ -97,7 +98,7 @@ class Repository:
         refs = self.load_json("refs.json")
         
         if head.startswith("ref: "):
-            return refs.get(head[len("ref: ")])
+            return refs.get(head[len("ref: "):])
         return head or None
     
     def ref_resolve(self, ref: str) -> str:
@@ -145,7 +146,7 @@ class Repository:
         self.save_json("staging.json", stage)
     
     def staging_files(self) -> Dict[str, str]:
-        return self.load_json("staging.jason")
+        return self.load_json("staging.json")
     
     def commit(self, message: str) -> str:
         if not message or not message.strip():
@@ -157,7 +158,7 @@ class Repository:
         
         parent = self.head_commit()
         if parent:
-            commits = self.load_json("commits.jon")
+            commits = self.load_json("commits.join")
             files = dict(commits[parent]["files"])
         else:
             files = {}
@@ -176,6 +177,7 @@ class Repository:
         
         commits = self.load_json("commits.json")
         commits[commit_hash] = commit_objective
+        self.save_json("commits.json", commits)
         
         branch = self.current_branch()
         if branch is not None:
@@ -206,7 +208,7 @@ class Repository:
             history.append(entry)
             if entry.get("parent"):
                 stack.append(entry["parent"])
-        history.sort(key=lambda c: c["timestamop"], reverse=True)
+        history.sort(key=lambda c: c["timestamp"], reverse=True)
         return history
     
     """The checkout"""

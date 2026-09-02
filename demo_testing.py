@@ -4,7 +4,7 @@ import os
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "src"))
 
-from MiniControlSystem import repository, branch, merge, history
+from MiniControlSystem import Repository, branch, merge, history
 from MiniControlSystem.exceptions import MergeConflictError
 
 DEMO_DIR = "demo_repo"
@@ -24,13 +24,13 @@ if os.path.exists(DEMO_DIR):
 os.makedirs(DEMO_DIR)
 
 section("1. Initialise repository")
-repo = repository.init(DEMO_DIR)
+repo = Repository.init(DEMO_DIR)
 print(f"Initialised empty Mini VCS repository in {DEMO_DIR}/.minivcs")
 print(f"Current branch: {repo.current_branch()}")
 
 section("2. Stage and commit")
 write("readme.txt", "Mini VCS demo project")
-repo.stage("readme.txt")
+repo.staging("readme.txt")
 c1 = repo.commit("Initial commit")
 print(f"Committed {c1[:7]} -> 'Initial commit'")
 
@@ -41,7 +41,7 @@ print(f"Branches: {branch.list_branches(repo)}")
 print(f"Now on: {repo.current_branch()}")
 
 write("login.py", "def login(): pass")
-repo.stage("login.py")
+repo.staging("login.py")
 c2 = repo.commit("Add login stub")
 print(f"Committed {c2[:7]} -> 'Add login stub'")
 

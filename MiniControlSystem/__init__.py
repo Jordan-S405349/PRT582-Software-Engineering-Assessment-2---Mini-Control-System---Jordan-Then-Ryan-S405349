@@ -1,4 +1,4 @@
-from repository import Repository
+from .repository import Repository
 from . import (
     branch,
     merge,

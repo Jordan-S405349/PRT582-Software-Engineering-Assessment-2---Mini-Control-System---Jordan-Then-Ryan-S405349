@@ -1,7 +1,7 @@
 from __future__ import annotations
 from typing import List
-from exceptions import BranchAlreadyExist, BranchCommitNotFound
-from repository import Repository
+from .exceptions import BranchAlreadyExist, BranchCommitNotFound
+from .repository import Repository
 
 
 def creating_branch(repo: Repository, name: str) -> None:

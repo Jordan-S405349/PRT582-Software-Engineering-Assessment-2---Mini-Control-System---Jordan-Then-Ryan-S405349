@@ -1,6 +1,6 @@
 from __future__ import annotations
 from typing import List, Optional
-from repository import Repository
+from .repository import Repository
 import time
 
 
