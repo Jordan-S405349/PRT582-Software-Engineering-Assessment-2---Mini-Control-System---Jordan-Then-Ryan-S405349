@@ -4,12 +4,12 @@ from MiniControlSystem.exceptions import(
     BranchCommitNotFound,
     UncommitedChanges
 )
-from conftest import write
+from .conftest import write
 import pytest
 
 def commit(repo, repo_path, filename, content, message):
     write(repo_path, filename, content)
-    repo.stage(filename)
+    repo.staging(filename)
     return repo.commit(message)
 
 
@@ -17,7 +17,7 @@ class TestFastForwardMerge:
     def test_fast_forward_when_no_divergence(self, repo, repo_path):
         """Normal: merging a branch that's strictly ahead just fast-forwards."""
         commit(repo, repo_path, "a.txt", "1", "base")
-        branch.create_branch(repo, "feature")
+        branch.creating_branch(repo, "feature")
         branch.switch_branch(repo, "feature")
         commit(repo, repo_path, "a.txt", "2", "feature change")
         branch.switch_branch(repo, "main")
@@ -30,7 +30,7 @@ class TestFastForwardMerge:
     def test_merge_already_up_to_date(self, repo, repo_path):
         """Boundary: merging a branch with no new commits reports up_to_date."""
         commit(repo, repo_path, "a.txt", "1", "base")
-        branch.create_branch(repo, "feature")
+        branch.creating_branch(repo, "feature")
         result = merge.merge(repo, "feature")
         assert result["status"] == "up_to_date"
 
@@ -42,9 +42,9 @@ class TestFastForwardMerge:
     def test_merge_blocked_by_uncommitted_changes(self, repo, repo_path):
         """Invalid: merge must not silently discard staged work."""
         commit(repo, repo_path, "a.txt", "1", "base")
-        branch.create_branch(repo, "feature")
+        branch.creating_branch(repo, "feature")
         write(repo_path, "b.txt", "uncommitted")
-        repo.stage("b.txt")
+        repo.staging("b.txt")
         with pytest.raises(UncommitedChanges):
             merge.merge(repo, "feature")
 
@@ -53,7 +53,7 @@ class TestThreeWayMerge:
     def test_merge_non_conflicting_changes(self, repo, repo_path):
         """Normal: both branches edit different files -> clean auto-merge."""
         commit(repo, repo_path, "shared.txt", "base", "base commit")
-        branch.create_branch(repo, "feature")
+        branch.creating_branch(repo, "feature")
 
         commit(repo, repo_path, "main_only.txt", "main change", "change on main")
 
@@ -64,7 +64,7 @@ class TestThreeWayMerge:
         result = merge.merge(repo, "feature")
 
         assert result["status"] == "merged"
-        commits = repo._load_json("commits.json")
+        commits = repo.load_json("commits.json")
         merged_files = commits[result["commit"]]["files"]
         assert set(merged_files.keys()) == {"shared.txt", "main_only.txt", "feature_only.txt"}
 
@@ -73,7 +73,7 @@ class TestThreeWayMerge:
         -> must raise MergeConflictError naming the conflicting file, and
         must NOT silently pick one side's version."""
         commit(repo, repo_path, "shared.txt", "base", "base commit")
-        branch.create_branch(repo, "feature")
+        branch.creating_branch(repo, "feature")
 
         commit(repo, repo_path, "shared.txt", "main version", "main edits shared.txt")
 
@@ -83,7 +83,7 @@ class TestThreeWayMerge:
         branch.switch_branch(repo, "main")
         with pytest.raises(MergeConflictError) as excinfo:
             merge.merge(repo, "feature")
-        assert "shared.txt" in excinfo.value.conflicts
+        assert "shared.txt" in excinfo.value.conflict
 
     def test_merge_does_not_mutate_state_on_conflict(self, repo, repo_path):
         """Regression: a failed merge must leave refs untouched, so the
@@ -91,23 +91,23 @@ class TestThreeWayMerge:
         found where a partial merge commit was written before the
         conflict check ran (see Task 3 of the report)."""
         commit(repo, repo_path, "shared.txt", "base", "base commit")
-        branch.create_branch(repo, "feature")
+        branch.creating_branch(repo, "feature")
         commit(repo, repo_path, "shared.txt", "main version", "main edit")
         branch.switch_branch(repo, "feature")
         commit(repo, repo_path, "shared.txt", "feature version", "feature edit")
         branch.switch_branch(repo, "main")
 
-        refs_before = dict(repo._load_json("refs.json"))
+        refs_before = dict(repo.load_json("refs.json"))
         with pytest.raises(MergeConflictError):
             merge.merge(repo, "feature")
-        refs_after = dict(repo._load_json("refs.json"))
+        refs_after = dict(repo.load_json("refs.json"))
         assert refs_before == refs_after
 
     def test_merge_same_deletion_is_not_a_conflict(self, repo, repo_path):
         """Boundary: if both branches independently arrive at the same
         result for a file, it's not a conflict even though both changed it."""
         commit(repo, repo_path, "shared.txt", "base", "base commit")
-        branch.create_branch(repo, "feature")
+        branch.creating_branch(repo, "feature")
 
         commit(repo, repo_path, "shared.txt", "same edit", "main edit")
 

@@ -105,7 +105,7 @@ def merge(repo: Repository, source_branch: str) -> Dict:
     import json as json
     payload = json.dumps(commit_objects, sort_keys=True).encode("utf-8")
     commit_hash = hash_bytes(payload)
-    commits[commits] = commit_objects
+    commits[commit_hash] = commit_objects
     repo.save_json("commits.json", commits)
     refs[current_branch] = commit_hash
     repo.save_json("refs.json", refs)

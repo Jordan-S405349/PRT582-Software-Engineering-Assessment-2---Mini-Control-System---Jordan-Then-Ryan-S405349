@@ -163,6 +163,7 @@ class Repository:
         else:
             files = {}
         files.update(stage)
+        files = {name: blob for name, blob in files.items() if blob is not None}
         
         commit_objective = {
             "message": message.strip(),
@@ -178,7 +179,7 @@ class Repository:
         commits = self.load_json("commits.json")
         commits[commit_hash] = commit_objective
         self.save_json("commits.json", commits)
-        
+ 
         branch = self.current_branch()
         if branch is not None:
             refs = self.load_json("refs.json")
@@ -189,6 +190,24 @@ class Repository:
             
         self.save_json("staging.json", {})
         return commit_hash
+    
+    def remove(self, filename: str) -> None:
+        parent = self.head_commit()
+        tracked = {}
+        if parent:
+            commits = self.load_json("commits.json")
+            tracked = commits[parent]["files"]
+
+        stage = self.load_json("staging.json")
+        if filename not in tracked and filename not in stage:
+            raise FileNotFoundError(f"'{filename}' is not tracked, cannot remove it")
+
+        stage[filename] = None
+        self.save_json("staging.json", stage)
+
+        full_path = os.path.join(self.path, filename)
+        if os.path.isfile(full_path):
+            os.remove(full_path)
     
     """The History"""
     def log(self, ref: Optional[str] = None) -> list[dict]:

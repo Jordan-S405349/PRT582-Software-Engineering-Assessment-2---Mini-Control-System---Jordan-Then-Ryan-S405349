@@ -11,3 +11,34 @@ This is the mini version control system
 - "log": it will commit history reversal
 
 ## The project layout
+```
+MiniControlSystem/
+    repository.py
+    branch.py
+    merge.py
+    history.py
+    exceptions.py
+Testing/                # pytest (46 Test with 98% coverage)
+demo.py                 # scripted demo testing
+'''
+
+## Setup
+''' bash
+pip install -r requirements.txt
+'''
+
+## Full test suite run
+'''bash
+python -m pytest Testing/ -v
+'''
+
+## Running test with coverage
+'''bash
+python -m coverage run --source=MiniControlSystem -m pytest Testing/
+python -m coverage report -m
+python -m coverage html -d htmlcov
+'''
+
+## Running demo testing
+'''bash 
+python demo_testing.py

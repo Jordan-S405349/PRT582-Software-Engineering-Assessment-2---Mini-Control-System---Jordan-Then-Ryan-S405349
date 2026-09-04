@@ -14,11 +14,11 @@ def write(repo_path, filename, content):
 
 
 @pytest.fixture
-def repo(temp_path):
+def repo(tmp_path):
     """creating a temp directory"""
-    return Repository.init(str(temp_path))
+    return Repository.init(str(tmp_path))
 
 
 @pytest.fixture
-def repo_path(temp_path):
-    return str(temp_path)
+def repo_path(tmp_path):
+    return str(tmp_path)
