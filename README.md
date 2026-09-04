@@ -42,3 +42,4 @@ python -m coverage html -d htmlcov
 ## Running demo testing
 '''bash 
 python demo_testing.py
+'''
